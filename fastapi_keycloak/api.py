@@ -223,7 +223,10 @@ class FastAPIKeycloak:
                         raise HTTPException(status_code=403, detail=f'Role "{role}" is required to perform this action')
             return user
 
-        return current_user
+        try:
+            return current_user
+        except (ExpiredSignatureError, JWTError, JWTClaimsError) as e:
+            raise HTTPException(status_code=401, detail=str(e))
 
     @functools.cached_property
     def open_id_configuration(self) -> dict:
